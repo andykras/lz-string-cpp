@@ -1,2 +1,4 @@
 # lz-string-cpp
-lzstring implementation in C++
+LZ-based compression algorithm implemented in C++
+
+See original repo https://github.com/pieroxy/lz-string 
