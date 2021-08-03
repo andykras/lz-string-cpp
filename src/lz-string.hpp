@@ -17,6 +17,8 @@
 // https://github.com/pieroxy/lz-string/blob/master/libs/lz-string.js
 namespace lzstring
 {
+namespace __inner
+{
   const std::string keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
   int charCodeAt(const std::string& str, int pos)
@@ -44,7 +46,6 @@ namespace lzstring
     std::string context_data;
     int context_data_val = 0;
     int context_data_position = 0;
-
 
     for (size_t ii = 0; ii < uncompressed.length(); ++ii)
     {
@@ -313,25 +314,22 @@ namespace lzstring
 
     return context_data;
   }
+} // namespace __inner
 
-  std::string compressToBase64(const std::string& uncompressed)
-  {
-    if (uncompressed.empty())
-    {
-      return {};
-    }
-
-    std::string res = _compress(uncompressed, 6, [](int a) { return keyStrBase64.at(a); });
-
-    switch (res.length() % 4) // To produce valid Base64
-    {
-    default: // When could this happen ?
-    case 0: return res;
-    case 1: return res + "===";
-    case 2: return res + "==";
-    case 3: return res + "=";
-    }
-
-    return res;
+// clang-format off
+std::string compressToBase64(const std::string& input)
+{
+  if (input.empty()) return {};
+  using namespace __inner;
+  auto res = _compress(input, 6, [](int a) { return keyStrBase64.at(a); });
+  switch (res.length() % 4) { // To produce valid Base64
+  default: // When could this happen ?
+  case 0 : return res;
+  case 1 : return res+"===";
+  case 2 : return res+"==";
+  case 3 : return res+"=";
   }
 }
+// clang-format on
+
+} // namespace lzstring

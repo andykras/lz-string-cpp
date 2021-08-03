@@ -1,0 +1,111 @@
+# to turn off formatter wrap code with comments
+# // clang-format off
+#     void    unformatted_code  ;
+# // clang-format on
+
+Language: Cpp
+Standard: Cpp11
+ColumnLimit: 110
+
+AccessModifierOffset: -2
+AlignEscapedNewlines: Left
+AlignTrailingComments: true
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: true
+ReflowComments: true
+
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AlignAfterOpenBracket: DontAlign
+
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBinaryOperators: None
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortLambdasOnASingleLine: Empty
+AlignOperands: false
+
+# braces
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: true
+  AfterObjCDeclaration: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+  IndentBraces: false
+
+# others
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+CommentPragmas: ''
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerIndentWidth: 2
+ContinuationIndentWidth: 2
+DerivePointerAlignment: false
+DisableFormat: false
+ExperimentalAutoDetectBinPacking: false
+IndentCaseLabels: false
+IndentWidth: 2
+IndentWrappedFunctionNames: false
+IndentFunctionDeclarationAfterType: false
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: Inner
+AlwaysBreakAfterReturnType: None
+
+#includes https://llvm.org/docs/CodingStandards.html#include-style
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+    Priority:        2
+  - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
+    Priority:        3
+  - Regex:           '<[[:alnum:].]+>'
+    Priority:        4
+  - Regex:           '.*'
+    Priority:        1
+
+# penalties
+PenaltyBreakAssignment: 1000
+PenaltyReturnTypeOnItsOwnLine: 1000
+PenaltyBreakBeforeFirstCallParameter: 200
+# PenaltyBreakComment: 300
+PenaltyBreakString: 1000
+# PenaltyBreakFirstLessLess: 120
+# PenaltyExcessCharacter: 1
+
+PointerAlignment: Left
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeCpp11BracedList: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: true
+SpacesInParentheses: false
+Cpp11BracedListStyle: true
+TabWidth: 2
+UseTab: Never
+BreakInheritanceList: BeforeComma
+IndentPPDirectives: AfterHash
+
+# special
+MacroBlockBegin: 'BEGIN_.*'
+MacroBlockEnd: 'END_.*'
