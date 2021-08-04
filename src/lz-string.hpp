@@ -1,12 +1,13 @@
 #pragma once
 
 /*
- * C++ implementation of LZ-String, version 1.4.4.
- *
- * Based on the LZ-String compression algorithm
+ * C++ implementation of LZ-String, version 1.4.4
  * https://github.com/pieroxy/lz-string
+ * https://github.com/andykras/lz-string-cpp
  *
- * MIT Licence
+ * MIT License
+ *
+ * Copyright (c) 2021 Andrey Krasnov
  *
  */
 
