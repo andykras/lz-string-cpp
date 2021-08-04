@@ -48,3 +48,19 @@ TEST(decompressFromBase64, CompareToOriginalText_UTF8)
 
   EXPECT_EQ(uncompressed, text);
 }
+
+TEST(CompareToJavaScript, compressToBase64)
+{
+  lzstring::string json = _U(R"([{"foo":42},{"pi":3.14},"long dash symbol":"—"])");
+  lzstring::string compressed = lzstring::compressToBase64(json);
+
+  EXPECT_EQ(compressed, _U(R"(NobwRAZg9lYFwBYBMBfANOADgS3gZgDoBGBdMAGygDsBzAAgBMBDAZwAs6WBPAWwCMo5eGEAoBGAC6QA)"));
+}
+
+TEST(CompareToJavaScript, decompressFromBase64)
+{
+  lzstring::string fromJS = _U(R"(NobwRAZg9lYFwBYBMBfANOADgS3gZgDoBGBdMAGygDsBzAAgBMBDAZwAs6WBPAWwCMo5eGEAoBGAC6QA)");
+  lzstring::string uncompressed = lzstring::decompressFromBase64(fromJS);
+
+  EXPECT_EQ(uncompressed, _U(R"([{"foo":42},{"pi":3.14},"long dash symbol":"—"])"));
+}
