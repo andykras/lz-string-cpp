@@ -13,37 +13,54 @@
 #include <string>
 #include <unordered_map>
 
-// preserveall original comments and naming from
+// preserve all original comments and naming from
 // https://github.com/pieroxy/lz-string/blob/master/libs/lz-string.js
 namespace lzstring
 {
+#ifdef _MSC_VER
+using string = std::wstring;
+#  ifndef _U
+#    define _U(x) L##x
+#  endif
+#else
+using string = std::string;
+#  ifndef _U
+#    define _U(x) x
+#  endif
+#endif
 namespace __inner
 {
-  const std::string keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  const string keyStrBase64{_U("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")};
+  const string::value_type equal{_U('=')};
 
-  int charCodeAt(const std::string& str, int pos)
+  int charCodeAt(const string& str, int pos)
   {
     return static_cast<int>(str.at(pos));
   }
 
+  string f(int ascii)
+  {
+    return {static_cast<string::value_type>(ascii)};
+  }
+
   template <typename Fn>
-  std::string _compress(const std::string& uncompressed, int bitsPerChar, Fn getCharFromInt)
+  string _compress(const string& uncompressed, int bitsPerChar, Fn getCharFromInt)
   {
     int i = 0;
     int value = 0;
 
-    std::unordered_map<std::string, int> context_dictionary;
-    std::unordered_map<std::string, bool> context_dictionaryToCreate;
+    std::unordered_map<string, int> context_dictionary;
+    std::unordered_map<string, bool> context_dictionaryToCreate;
 
-    std::string context_c;
-    std::string context_wc;
-    std::string context_w;
+    string context_c;
+    string context_wc;
+    string context_w;
 
     int context_enlargeIn = 2; // Compensate for the first entry which should not count
     int context_dictSize = 3;
     int context_numBits = 2;
 
-    std::string context_data;
+    string context_data;
     int context_data_val = 0;
     int context_data_position = 0;
 
@@ -314,10 +331,208 @@ namespace __inner
 
     return context_data;
   }
+
+  template <typename Fn>
+  string _decompress(int length, int resetValue, Fn getNextValue)
+  {
+    std::unordered_map<int, string> dictionary;
+
+    int next = 0;
+    int enlargeIn = 4;
+    int dictSize = 4;
+    int numBits = 3;
+    string entry;
+    string result;
+    string w;
+    int bits, resb, maxpower, power;
+    string c;
+
+    struct
+    {
+      int val, position, index;
+    } data{getNextValue(0), resetValue, 1};
+
+    bits = 0;
+    maxpower = 4; // Math.pow(2, 2);
+    power = 1;
+
+    while (power != maxpower)
+    {
+      resb = data.val & data.position;
+      data.position >>= 1;
+      if (data.position == 0)
+      {
+        data.position = resetValue;
+        data.val = getNextValue(data.index++);
+      }
+      bits |= (resb > 0 ? 1 : 0) * power;
+      power <<= 1;
+    }
+
+    switch (next = bits)
+    {
+    case 0:
+      bits = 0;
+      maxpower = 256; // Math.pow(2, 8);
+      power = 1;
+      while (power != maxpower)
+      {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position == 0)
+        {
+          data.position = resetValue;
+          data.val = getNextValue(data.index++);
+        }
+        bits |= (resb > 0 ? 1 : 0) * power;
+        power <<= 1;
+      }
+      c = f(bits);
+      break;
+
+    case 1:
+      bits = 0;
+      maxpower = 65536; // Math.pow(2, 16);
+      power = 1;
+      while (power != maxpower)
+      {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position == 0)
+        {
+          data.position = resetValue;
+          data.val = getNextValue(data.index++);
+        }
+        bits |= (resb > 0 ? 1 : 0) * power;
+        power <<= 1;
+      }
+      c = f(bits);
+      break;
+
+    case 2:
+      return {};
+    }
+
+    dictionary[3] = c;
+    w = c;
+    result += c;
+
+    while (true)
+    {
+      if (data.index > length)
+      {
+        return {};
+      }
+
+      bits = 0;
+      maxpower = 1 << numBits; // Math.pow(2, numBits);
+      power = 1;
+      while (power != maxpower)
+      {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position == 0)
+        {
+          data.position = resetValue;
+          data.val = getNextValue(data.index++);
+        }
+        bits |= (resb > 0 ? 1 : 0) * power;
+        power <<= 1;
+      }
+
+      int c;
+      switch (c = bits)
+      {
+      case 0:
+        bits = 0;
+        maxpower = 256; // Math.pow(2, 8);
+        power = 1;
+        while (power != maxpower)
+        {
+          resb = data.val & data.position;
+          data.position >>= 1;
+          if (data.position == 0)
+          {
+            data.position = resetValue;
+            data.val = getNextValue(data.index++);
+          }
+          bits |= (resb > 0 ? 1 : 0) * power;
+          power <<= 1;
+        }
+
+        dictionary[dictSize++] = f(bits);
+        c = dictSize - 1;
+        enlargeIn--;
+        break;
+
+      case 1:
+        bits = 0;
+        maxpower = 65536; // Math.pow(2, 16);
+        power = 1;
+        while (power != maxpower)
+        {
+          resb = data.val & data.position;
+          data.position >>= 1;
+          if (data.position == 0)
+          {
+            data.position = resetValue;
+            data.val = getNextValue(data.index++);
+          }
+          bits |= (resb > 0 ? 1 : 0) * power;
+          power <<= 1;
+        }
+        dictionary[dictSize++] = f(bits);
+        c = dictSize - 1;
+        enlargeIn--;
+        break;
+
+      case 2:
+        return result;
+      }
+
+      if (enlargeIn == 0)
+      {
+        enlargeIn = 1 << numBits; // Math.pow(2, numBits);
+        numBits++;
+      }
+
+      if (!dictionary[c].empty())
+      {
+        entry = dictionary[c];
+      }
+      else
+      {
+        if (c == dictSize)
+        {
+          entry = w + w.at(0);
+        }
+        else
+        {
+          return {};
+        }
+      }
+      result += entry;
+
+      // Add w+entry[0] to the dictionary.
+      dictionary[dictSize++] = w + entry.at(0);
+      enlargeIn--;
+
+      w = entry;
+
+      if (enlargeIn == 0)
+      {
+        enlargeIn = 1 << numBits; // Math.pow(2, numBits);
+        numBits++;
+      }
+    }
+
+    return {};
+  }
+
 } // namespace __inner
 
 // clang-format off
-std::string compressToBase64(const std::string& input)
+string compressToBase64(const string& input)
 {
   if (input.empty()) return {};
   using namespace __inner;
@@ -325,10 +540,19 @@ std::string compressToBase64(const std::string& input)
   switch (res.length() % 4) { // To produce valid Base64
   default: // When could this happen ?
   case 0 : return res;
-  case 1 : return res+"===";
-  case 2 : return res+"==";
-  case 3 : return res+"=";
+  case 1 : return res+string(3,equal);
+  case 2 : return res+string(2,equal);
+  case 3 : return res+string(1,equal);
   }
+}
+
+string decompressFromBase64(const string& input)
+{
+  if (input.empty()) return {};
+  using namespace __inner;
+  std::unordered_map<string::value_type, int> baseReverseDic;
+  for (int i = 0; i < keyStrBase64.length(); ++i) baseReverseDic[keyStrBase64.at(i)] = i;
+  return _decompress(input.length(), 32, [&](int index) { return baseReverseDic[input.at(index)]; });
 }
 // clang-format on
 
