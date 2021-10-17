@@ -24,9 +24,10 @@ using string = std::wstring;
 #    define _U(x) L##x
 #  endif
 #else
-using string = std::string;
+using string = std::u16string;
+#include <uchar.h>
 #  ifndef _U
-#    define _U(x) x
+#    define _U(x) u##x
 #  endif
 #endif
 namespace __inner
